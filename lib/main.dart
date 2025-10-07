@@ -1,25 +1,78 @@
 import 'package:flutter/material.dart';
 import 'screens/map_screen.dart';
 import 'screens/music_matches_screen.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/register_screen.dart';
+import 'services/auth_service.dart';
+import 'services/storage_service.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Dating App',
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-      ),
+      theme: ThemeData(primarySwatch: Colors.deepPurple),
       initialRoute: '/',
       routes: {
-        '/': (context) => MapScreen(),
-        '/music-matches': (context) => MusicMatchesScreen(userId: 1),  // пока статический userId, потом сделаешь динамическим
+        '/': (context) => const AuthCheck(),
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => RegisterScreen(),
+        '/map': (context) => MapScreen(),
+        '/music-matches': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          final userId = (args is int) ? args : 1;
+          return MusicMatchesScreen(userId: userId);
+        },
       },
+    );
+  }
+}
+
+class AuthCheck extends StatefulWidget {
+  const AuthCheck({super.key});
+
+  @override
+  State<AuthCheck> createState() => _AuthCheckState();
+}
+
+class _AuthCheckState extends State<AuthCheck> {
+  @override
+  void initState() {
+    super.initState();
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    final authService = AuthService();
+    final isLoggedIn = await authService.isLoggedIn();
+
+    if (!mounted) return;
+
+    if (isLoggedIn) {
+      final userId = await StorageService.getUserId(); // can be null
+      if (!mounted) return;
+      // Navigate to an EXISTING route (not '/home')
+      Navigator.pushReplacementNamed(
+        context,
+        '/map',
+        arguments: userId ?? 1,
+      );
+    } else {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }

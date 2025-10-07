@@ -17,11 +17,59 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _getUserLocation() async {
-    Position position = await Geolocator.getCurrentPosition();
-    setState(() {
-      userLocation = LatLng(position.latitude, position.longitude);
-      mapController.animateCamera(CameraUpdate.newLatLngZoom(userLocation, 14));
-    });
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Check if location services are enabled
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Location services are disabled')),
+      );
+      return;
+    }
+
+    // Check permission status
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Location permissions denied')),
+        );
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Location permissions permanently denied')),
+      );
+      return;
+    }
+
+    // Now safe to get location
+    try {
+      // ... permission checks ...
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 10), // Add timeout
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        userLocation = LatLng(position.latitude, position.longitude);
+        mapController.animateCamera(
+          CameraUpdate.newLatLngZoom(userLocation, 14),
+        );
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to get location: ${e.toString()}')),
+      );
+    }
   }
 
   @override
