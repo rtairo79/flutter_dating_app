@@ -4,7 +4,6 @@ import 'screens/music_matches_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'services/auth_service.dart';
-import 'services/storage_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,11 +22,11 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const AuthCheck(),
         '/login': (context) => const LoginScreen(),
-        '/register': (context) => RegisterScreen(),
-        '/map': (context) => MapScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/map': (context) => const MapScreen(),
         '/music-matches': (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
-          final userId = (args is int) ? args : 1;
+          final int userId = (args is int) ? args : 1;
           return MusicMatchesScreen(userId: userId);
         },
       },
@@ -56,14 +55,7 @@ class _AuthCheckState extends State<AuthCheck> {
     if (!mounted) return;
 
     if (isLoggedIn) {
-      final userId = await StorageService.getUserId(); // can be null
-      if (!mounted) return;
-      // Navigate to an EXISTING route (not '/home')
-      Navigator.pushReplacementNamed(
-        context,
-        '/map',
-        arguments: userId ?? 1,
-      );
+       Navigator.pushReplacementNamed(context, '/map');
     } else {
       Navigator.pushReplacementNamed(context, '/login');
     }

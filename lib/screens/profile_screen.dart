@@ -4,6 +4,8 @@ import '../services/spotify_auth_service.dart';
 import '../services/api_service.dart';
 
 class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
   Future<void> _connectSpotify(BuildContext context) async {
     final token = await SpotifyAuthService.authenticateSpotify();
     if (token != null) {

@@ -20,9 +20,9 @@ class StorageService {
     return await _storage.read(key: 'refresh_token');
   }
 
-  static Future<void> saveUserId(int userId) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('user_id', userId);
+  static Future<void> saveUserId(String userId) async {
+    
+    
   }
 
   static Future<int?> getUserId() async {

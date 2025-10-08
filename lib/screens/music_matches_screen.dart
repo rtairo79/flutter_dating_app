@@ -4,7 +4,7 @@ import '../services/api_service.dart';
 class MusicMatchesScreen extends StatelessWidget {
   final int userId;
 
-  MusicMatchesScreen({required this.userId});
+  const MusicMatchesScreen({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -13,15 +13,18 @@ class MusicMatchesScreen extends StatelessWidget {
       body: FutureBuilder<List<dynamic>>(
         future: ApiService.getMusicMatches(userId),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting)
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
+          }
 
-          if (snapshot.hasError)
+          if (snapshot.hasError) {
             return Center(child: Text("Ошибка: ${snapshot.error}"));
+          }
 
           final users = snapshot.data!;
-          if (users.isEmpty)
+          if (users.isEmpty) {
             return Center(child: Text("Нет совпадений"));
+          }
 
           return ListView.builder(
             itemCount: users.length,
